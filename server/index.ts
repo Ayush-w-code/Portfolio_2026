@@ -1,10 +1,27 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const router = express.Router();
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const compression = require('compression');
+
+// Load .env if present
+const envPath = path.resolve(__dirname, '../.env');
+if (fs.existsSync(envPath)) {
+    const envFile = fs.readFileSync(envPath, 'utf-8');
+    envFile.split('\n').forEach((line: string) => {
+        const parts = line.split('=');
+        if (parts.length >= 2) {
+            const key = parts[0].trim();
+            const val = parts.slice(1).join('=').trim().replace(/^["']|["']$/g, '');
+            if (key && !process.env[key]) {
+                process.env[key] = val;
+            }
+        }
+    });
+}
 
 const app = express();
 const port = 8080;

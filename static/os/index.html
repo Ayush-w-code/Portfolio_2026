@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AyushOS - Ayush Dubey Portfolio</title>
+    <style>
+        :root {
+            --win-bg: #c0c0c0;
+            --win-border-light: #ffffff;
+            --win-border-dark: #808080;
+            --win-border-darker: #000000;
+            --win-title-active: #000080;
+            --win-title-gradient: #1084d0;
+            --win-title-inactive: #808080;
+            --desktop-bg: #008080;
+            --accent-green: #00ff66;
+            --accent-cyan: #00e5ff;
+            --text-dark: #000000;
+            --font-ui: 'Tahoma', 'MS Sans Serif', 'Segoe UI', monospace, sans-serif;
+            --font-mono: 'Consolas', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--desktop-bg);
+            font-family: var(--font-ui);
+            font-size: 13px;
+            color: var(--text-dark);
+        }
+
+        /* Retro bevel helpers */
+        .bevel-out {
+            background: var(--win-bg);
+            border-top: 2px solid var(--win-border-light);
+            border-left: 2px solid var(--win-border-light);
+            border-right: 2px solid var(--win-border-darker);
+            border-bottom: 2px solid var(--win-border-darker);
+            box-shadow: inset -1px -1px 0 var(--win-border-dark), inset 1px 1px 0 #dfdfdf;
+        }
+
+        .bevel-in {
+            background: #ffffff;
+            border-top: 2px solid var(--win-border-dark);
+            border-left: 2px solid var(--win-border-dark);
+            border-right: 2px solid var(--win-border-light);
+            border-bottom: 2px solid var(--win-border-light);
+            box-shadow: inset 1px 1px 0 var(--win-border-darker);
+        }
+
+        /* Desktop layout */
+        #desktop {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 34px);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 14px;
+            background:
+                radial-gradient(circle at 85% 20%, rgba(0, 255, 170, 0.08), transparent 40%),
+                linear-gradient(135deg, #006666 0%, #008080 55%, #004d4d 100%);
+        }
+
+        /* Subtle watermark on desktop */
+        .desktop-watermark {
+            position: absolute;
+            right: 20px;
+            bottom: 18px;
+            text-align: right;
+            pointer-events: none;
+            color: rgba(255, 255, 255, 0.22);
+            font-family: var(--font-mono);
+        }
+        .desktop-watermark h1 {
+            font-size: 24px;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+        .desktop-watermark p {
+            font-size: 12px;
+        }
+
+        /* Desktop Icons */
+        .desktop-icon {
+            width: 82px;
+            padding: 6px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            border: 1px dotted transparent;
+        }
+
+        .desktop-icon:hover .icon-label,
+        .desktop-icon.selected .icon-label {
+            background: var(--win-title-active);
+            color: #ffffff;
+            outline: 1px dotted #ffff00;
+        }
+
+        .icon-graphic {
+            width: 38px;
+            height: 38px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.45));
+        }
+
+        .icon-label {
+            color: #ffffff;
+            font-size: 12px;
+            line-height: 1.2;
+            padding: 1px 4px;
+            text-shadow: 1px 1px 1px #000000;
+            word-break: break-word;
+        }
+
+        /* Windows */
+        .window {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            min-width: 320px;
+            min-height: 220px;
+            padding: 3px;
+            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.45);
+        }
+
+        .window.hidden {
+            display: none !important;
+        }
+
+        .window.maximized {
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .title-bar {
+            height: 24px;
+            background: linear-gradient(90deg, var(--win-title-active), var(--win-title-gradient));
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4px 0 6px;
+            font-weight: bold;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+            cursor: move;
+        }
+
+        .window.inactive .title-bar {
+            background: linear-gradient(90deg, #606060, #909090);
+            color: #d8d8d8;
+        }
+
+        .title-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .title-controls {
+            display: flex;
+            gap: 2px;
+        }
+
+        .win-btn {
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #000;
+            font-family: var(--font-ui);
+        }
+
+        .win-btn:active {
+            border-top: 2px solid var(--win-border-darker);
+            border-left: 2px solid var(--win-border-darker);
+            border-right: 2px solid var(--win-border-light);
+            border-bottom: 2px solid var(--win-border-light);
+            padding-top: 1px;
+            padding-left: 1px;
+        }
+
+        /* Window Menu/Toolbar */
+        .window-menubar {
+            display: flex;
+            gap: 12px;
+            padding: 3px 8px;
+            border-bottom: 1px solid var(--win-border-dark);
+            font-size: 12px;
+            background: var(--win-bg);
+        }
+
+        .window-menubar span {
+            cursor: pointer;
+        }
+        .window-menubar span u {
+            text-decoration: underline;
+        }
+
+        /* Window Content Area */
+        .window-body {
+            flex: 1;
+            margin-top: 3px;
+            overflow-y: auto;
+            padding: 16px 20px;
+            user-select: text;
+            background: #ffffff;
+            color: #111111;
+            line-height: 1.55;
+        }
+
+        .window-statusbar {
+            height: 20px;
+            margin-top: 3px;
+            padding: 2px 8px;
+            font-size: 11px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--win-border-dark);
+            background: var(--win-bg);
+        }
+
+        /* Content Typography & Components */
+        .hero-banner {
+            background: linear-gradient(135deg, #000046 0%, #1cb5e0 100%);
+            color: #ffffff;
+            padding: 18px 20px;
+            border: 2px solid #000000;
+            margin-bottom: 16px;
+            box-shadow: 3px 3px 0 #808080;
+        }
+
+        .hero-banner h1 {
+            font-size: 24px;
+            margin-bottom: 4px;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+        }
+
+        .hero-banner .tagline {
+            font-size: 13px;
+            color: #e0f7fa;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .hero-banner .location {
+            font-size: 12px;
+            color: #ffd54f;
+            font-family: var(--font-mono);
+        }
+
+        .section-box {
+            border: 2px solid #808080;
+            background: #f8f9fa;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            box-shadow: 2px 2px 0 #c0c0c0;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #000080;
+            border-bottom: 2px solid #000080;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+        }
+
+        .pitch-quote {
+            font-size: 13.5px;
+            background: #eef4ff;
+            border-left: 4px solid #000080;
+            padding: 10px 14px;
+            font-style: italic;
+            color: #1a1a1a;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #000000;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-top: 6px;
+        }
+
+        .action-btn:hover {
+            background: #dcdcdc;
+        }
+
+        /* Badge Clusters */
+        .skill-group {
+            margin-bottom: 14px;
+        }
+
+        .skill-group-title {
+            font-weight: bold;
+            font-size: 13px;
+            color: #222;
+            margin-bottom: 6px;
+            font-family: var(--font-mono);
+        }
+
+        .badge-cluster {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .skill-badge {
+            display: inline-block;
+            padding: 3px 9px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            background: #000080;
+            color: #ffffff;
+            border: 1px solid #000;
+            box-shadow: 2px 2px 0 #808080;
+        }
+
+        .skill-badge.alt-1 { background: #006666; }
+        .skill-badge.alt-2 { background: #4a148c; }
+        .skill-badge.alt-3 { background: #1b5e20; }
+        .skill-badge.alt-4 { background: #b71c1c; }
+
+        /* Project Cards */
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .project-card {
+            border: 2px solid #000000;
+            background: #ffffff;
+            padding: 12px 14px;
+            box-shadow: 3px 3px 0 #808080;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px dashed #808080;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .project-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #000080;
+            font-family: var(--font-mono);
+        }
+
+        .project-desc {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #222;
+        }
+
+        .project-tech {
+            font-size: 11.5px;
+            font-family: var(--font-mono);
+            color: #004d40;
+            background: #e0f2f1;
+            padding: 4px 8px;
+            border: 1px solid #00695c;
+            display: inline-block;
+        }
+
+        /* Terminal Style */
+        .terminal-body {
+            background: #0c0c0c !important;
+            color: #00ff66 !important;
+            font-family: var(--font-mono) !important;
+            padding: 12px 14px !important;
+            font-size: 13px;
+        }
+
+        .terminal-output div {
+            margin-bottom: 6px;
+            white-space: pre-wrap;
+        }
+
+        .terminal-input-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .terminal-prompt {
+            color: #00e5ff;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ff66;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        /* Taskbar */
+        #taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2px 4px;
+            z-index: 9999;
+        }
+
+        .taskbar-left {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #start-btn {
+            height: 26px;
+            padding: 0 10px;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        #start-btn.active {
+            border-top: 2px solid var(--win-border-darker);
+            border-left: 2px solid var(--win-border-darker);
+            border-right: 2px solid var(--win-border-light);
+            border-bottom: 2px solid var(--win-border-light);
+            background: #b0b0b0;
+        }
+
+        .taskbar-divider {
+            width: 2px;
+            height: 24px;
+            background: var(--win-border-dark);
+            border-right: 1px solid var(--win-border-light);
+            margin: 0 2px;
+        }
+
+        #taskbar-tabs {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+            overflow-x: auto;
+        }
+
+        .task-tab {
+            height: 26px;
+            min-width: 110px;
+            max-width: 165px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-tab.active {
+            background: #dfdfdf;
+            border-top: 2px solid var(--win-border-darker);
+            border-left: 2px solid var(--win-border-darker);
+            border-right: 2px solid var(--win-border-light);
+            border-bottom: 2px solid var(--win-border-light);
+            font-weight: bold;
+        }
+
+        .system-tray {
+            height: 26px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            background: var(--win-bg);
+            border-top: 1px solid var(--win-border-dark);
+            border-left: 1px solid var(--win-border-dark);
+            border-right: 1px solid var(--win-border-light);
+            border-bottom: 1px solid var(--win-border-light);
+        }
+
+        /* Start Menu */
+        #start-menu {
+            position: absolute;
+            bottom: 34px;
+            left: 2px;
+            width: 240px;
+            display: flex;
+            z-index: 10000;
+            padding: 3px;
+        }
+
+        #start-menu.hidden {
+            display: none;
+        }
+
+        .start-sidebar {
+            width: 30px;
+            background: linear-gradient(180deg, #000080 0%, #1084d0 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+        }
+
+        .start-sidebar span {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-weight: bold;
+            font-size: 15px;
+            letter-spacing: 1.5px;
+            font-family: var(--font-mono);
+        }
+
+        .start-items {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2px;
+        }
+
+        .start-item {
+            padding: 7px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 12.5px;
+            color: #000;
+            text-decoration: none;
+        }
+
+        .start-item:hover {
+            background: var(--win-title-active);
+            color: #ffffff;
+        }
+
+        .start-sep {
+            height: 1px;
+            background: var(--win-border-dark);
+            border-bottom: 1px solid var(--win-border-light);
+            margin: 4px 2px;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 6px 8px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="desktop">
+        <!-- Desktop Icons -->
+        <div class="desktop-icon" onclick="openWindow('win-showcase')">
+            <div class="icon-graphic">🖥️</div>
+            <div class="icon-label">Portfolio Showcase</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-about')">
+            <div class="icon-graphic">👤</div>
+            <div class="icon-label">About Ayush</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-skills')">
+            <div class="icon-graphic">🛠️</div>
+            <div class="icon-label">Skills &amp; Toolkit</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-projects')">
+            <div class="icon-graphic">🚀</div>
+            <div class="icon-label">Featured Projects</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-experience')">
+            <div class="icon-graphic">🎓</div>
+            <div class="icon-label">Education &amp; Certs</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-terminal')">
+            <div class="icon-graphic">📟</div>
+            <div class="icon-label">AyushShell Terminal</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-contact')">
+            <div class="icon-graphic">✉️</div>
+            <div class="icon-label">Connect / Links</div>
+        </div>
+
+        <div class="desktop-watermark">
+            <h1>AYUSH DUBEY</h1>
+            <p>AyushOS v2026.1 // AI/ML &amp; Python Edition</p>
+        </div>
+
+        <!-- WINDOW 1: ALL-IN-ONE PORTFOLIO SHOWCASE (Open by Default) -->
+        <div id="win-showcase" class="window bevel-out" style="top: 18px; left: 115px; width: 1040px; height: 860px; z-index: 20;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-showcase')">
+                <div class="title-bar-left">
+                    <span>🖥️</span>
+                    <span>Ayush Dubey — Complete Portfolio Showcase</span>
+                </div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-showcase')" title="Minimize">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-showcase')" title="Maximize">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-showcase')" title="Close">✕</button>
+                </div>
+            </div>
+            <div class="window-menubar">
+                <span onclick="openWindow('win-about')"><u>A</u>bout</span>
+                <span onclick="openWindow('win-skills')"><u>S</u>kills</span>
+                <span onclick="openWindow('win-projects')"><u>P</u>rojects</span>
+                <span onclick="openWindow('win-experience')"><u>E</u>ducation &amp; Certs</span>
+                <span onclick="openWindow('win-terminal')"><u>T</u>erminal</span>
+                <span onclick="openWindow('win-contact')"><u>C</u>ontact</span>
+            </div>
+            <div class="window-body bevel-in">
+                <!-- Hero Banner -->
+                <div class="hero-banner">
+                    <h1>Ayush Dubey</h1>
+                    <div class="tagline">BCA Student | Aspiring AI/ML Developer | Python Programmer</div>
+                    <div class="location">📍 DBS Global University, Dehradun, India (2026 – Present)</div>
+                    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+                        <a class="action-btn bevel-out" href="https://github.com/Ayush-w-code" target="_blank" rel="noopener noreferrer">🐙 GitHub: Ayush-w-code</a>
+                        <a class="action-btn bevel-out" href="https://www.linkedin.com/in/ayush-dubey-2ba2a3423/" target="_blank" rel="noopener noreferrer">💼 LinkedIn: ayush-dubey</a>
+                        <a class="action-btn bevel-out" href="mailto:ayushdubey2441@gmail.com">✉️ ayushdubey2441@gmail.com</a>
+                        <button class="action-btn bevel-out" onclick="openWindow('win-projects')">🚀 Explore Projects</button>
+                        <button class="action-btn bevel-out" onclick="openWindow('win-terminal')">📟 Open Terminal</button>
+                    </div>
+                </div>
+
+                <!-- About Me -->
+                <div class="section-box">
+                    <div class="section-title"><span>⚡</span> About Me</div>
+                    <div class="pitch-quote">
+                        "I am a BCA student at DBS Global University, Dehradun, with a strong interest in Artificial Intelligence, Machine Learning, Python programming, and software development. I enjoy building practical technology projects, exploring AI-powered solutions, and learning how intelligent systems can solve real-world problems.
+                        <br><br>
+                        I am continuously improving my programming, data analysis, and development skills through hands-on projects, coursework, and technical activities."
+                    </div>
+                </div>
+
+                <!-- Career Objective -->
+                <div class="section-box">
+                    <div class="section-title"><span>🎯</span> Career Objective</div>
+                    <div class="pitch-quote">
+                        "To develop strong foundations in AI, machine learning, and software engineering while building practical projects that solve real-world problems and contribute to meaningful technology solutions."
+                    </div>
+                </div>
+
+                <!-- Technical Skills & Toolkit -->
+                <div class="section-box">
+                    <div class="section-title"><span>🛠️</span> Technical Skills &amp; Toolkit</div>
+
+                    <div class="skill-group">
+                        <div class="skill-group-title">▸ Programming Languages</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge">Python</span>
+                            <span class="skill-badge">C</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-group">
+                        <div class="skill-group-title">▸ Data Analysis</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge alt-1">Pandas</span>
+                            <span class="skill-badge alt-1">NumPy</span>
+                            <span class="skill-badge alt-1">Data Cleaning</span>
+                            <span class="skill-badge alt-1">Exploratory Data Analysis (EDA)</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-group">
+                        <div class="skill-group-title">▸ Machine Learning &amp; Modeling</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge alt-2">Scikit-learn</span>
+                            <span class="skill-badge alt-2">XGBoost</span>
+                            <span class="skill-badge alt-2">Data Preprocessing</span>
+                            <span class="skill-badge alt-2">Predictive Modeling &amp; Classification</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-group">
+                        <div class="skill-group-title">▸ Backend Development</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge alt-3">FastAPI</span>
+                            <span class="skill-badge alt-3">RESTful APIs</span>
+                            <span class="skill-badge alt-3">API Routing &amp; Schema Validation</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-group">
+                        <div class="skill-group-title">▸ Web Development</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge alt-4">HTML5</span>
+                            <span class="skill-badge alt-4">CSS3</span>
+                            <span class="skill-badge alt-4">React (Project-based experience)</span>
+                            <span class="skill-badge alt-4">Responsive UI</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-group" style="margin-bottom: 0;">
+                        <div class="skill-group-title">▸ Tools &amp; Environments</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge">Git</span>
+                            <span class="skill-badge">GitHub</span>
+                            <span class="skill-badge">VS Code</span>
+                            <span class="skill-badge">Jupyter Notebook</span>
+                            <span class="skill-badge">SQLite</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Projects -->
+                <div class="section-box">
+                    <div class="section-title"><span>🚀</span> Featured Projects</div>
+                    <div class="project-grid">
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">1. JARVIS — AI Desktop Assistant</span>
+                            </div>
+                            <p class="project-desc">A desktop assistant project designed to support AI-powered conversations and desktop workflows. Features conversational AI, responsive desktop interface, local memory, voice interaction, and assistant workflow automation.</p>
+                            <div class="project-tech"><strong>Technologies:</strong> Python, PySide6, Google Gemini API, SQLite</div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">2. SentinelEdge — Threat Detection</span>
+                            </div>
+                            <p class="project-desc">A cybersecurity-focused project exploring threat detection and security analytics. Designed to present security-related insights in a clear, useful dashboard interface and support active threat analysis.</p>
+                            <div class="project-tech"><strong>Technologies:</strong> Python, Security Analytics, Dashboard UI</div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">3. Fake Review Detector</span>
+                            </div>
+                            <p class="project-desc">A machine-learning project designed to classify potentially fake reviews using data analysis and predictive modelling, identifying suspicious review patterns and anomalies.</p>
+                            <div class="project-tech"><strong>Technologies:</strong> Python, Pandas, Scikit-learn</div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">4. Maritime Command Center (Smart India Hackathon 2026)</span>
+                            </div>
+                            <p class="project-desc">A maritime analytics platform developed for the Smart India Hackathon 2026 problem statement. Explores predictive freight forecasting, maritime route analytics, and emissions-related insights.</p>
+                            <div class="project-tech"><strong>Technologies:</strong> Python, XGBoost, FastAPI, React, Visualization Tools</div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">5. AI Hub</span>
+                            </div>
+                            <p class="project-desc">A project exploring a unified interface for interacting with modern AI models, making diverse intelligent tools convenient and seamless to access through a single cohesive dashboard.</p>
+                            <div class="project-tech"><strong>Technologies:</strong> Python, Google GenAI, Model Interfaces</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education -->
+                <div class="section-box">
+                    <div class="section-title"><span>🎓</span> Education</div>
+                    <div class="project-card" style="margin-bottom: 8px;">
+                        <div class="project-header">
+                            <span class="project-title">Bachelor of Computer Applications (BCA)</span>
+                        </div>
+                        <p class="project-desc" style="margin-bottom: 2px;"><strong>DBS Global University, Dehradun</strong></p>
+                        <p class="project-desc" style="margin-bottom: 0; color: #555;">2026 – Present</p>
+                    </div>
+                    <div class="project-grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">Class XII</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Completed in 2026</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">Class X</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Completed in 2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certifications & Achievements -->
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title"><span>🏆</span> Certifications &amp; Achievements</div>
+                    <div class="project-grid">
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">💡 AI/ML Certification Course</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Masai Learning, associated with Vishlesan i-Hub, IIT Patna</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">🇮🇳 Smart India Hackathon 2026</div>
+                            <p class="project-desc" style="margin-bottom: 0;">First-round qualification at team level (Maritime Analytics &amp; Freight Forecasting)</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">⚡ Technical Activities &amp; Competitions</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Active participant and contributor across university technical competitions and coding activities</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Ready — Ayush Dubey Portfolio</span>
+                <span>DBS Global University, Dehradun</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 2: ABOUT -->
+        <div id="win-about" class="window bevel-out hidden" style="top: 60px; left: 180px; width: 680px; height: 500px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-about')">
+                <div class="title-bar-left"><span>👤</span><span>About — Ayush Dubey</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-about')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-about')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-about')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="hero-banner">
+                    <h1>Ayush Dubey</h1>
+                    <div class="tagline">BCA Student | Aspiring AI/ML Developer | Python Programmer</div>
+                    <div class="location">🎓 DBS Global University, Dehradun (2026 – Present)</div>
+                    <div class="location" style="margin-top: 4px;">📍 Dehradun, India</div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">Background &amp; Motivation</div>
+                    <div class="pitch-quote">
+                        "I am a BCA student at DBS Global University, Dehradun, with a strong interest in Artificial Intelligence, Machine Learning, Python programming, and software development. I enjoy building practical technology projects, exploring AI-powered solutions, and learning how intelligent systems can solve real-world problems.
+                        <br><br>
+                        I am continuously improving my programming, data analysis, and development skills through hands-on projects, coursework, and technical activities."
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">Career Objective</div>
+                    <div class="pitch-quote">
+                        "To develop strong foundations in AI, machine learning, and software engineering while building practical projects that solve real-world problems and contribute to meaningful technology solutions."
+                    </div>
+                </div>
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title">Connect Directly</div>
+                    <p style="margin-bottom: 8px;"><strong>Email:</strong> <a href="mailto:ayushdubey2441@gmail.com">ayushdubey2441@gmail.com</a></p>
+                    <p style="margin-bottom: 8px;"><strong>GitHub:</strong> <a href="https://github.com/Ayush-w-code" target="_blank" rel="noopener noreferrer">github.com/Ayush-w-code</a></p>
+                    <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/ayush-dubey-2ba2a3423/" target="_blank" rel="noopener noreferrer">linkedin.com/in/ayush-dubey-2ba2a3423</a></p>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Identity: Ayush Dubey</span>
+                <span>DBS Global University</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 3: SKILLS -->
+        <div id="win-skills" class="window bevel-out hidden" style="top: 80px; left: 220px; width: 740px; height: 540px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-skills')">
+                <div class="title-bar-left"><span>🛠️</span><span>Technical Skills &amp; Toolkit</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-skills')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-skills')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-skills')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="section-box">
+                    <div class="section-title">1. Programming Languages</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge">Python</span>
+                        <span class="skill-badge">C</span>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">2. Data Analysis &amp; Manipulation</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge alt-1">Pandas</span>
+                        <span class="skill-badge alt-1">NumPy</span>
+                        <span class="skill-badge alt-1">Data Cleaning</span>
+                        <span class="skill-badge alt-1">Exploratory Data Analysis</span>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">3. Machine Learning</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge alt-2">Scikit-learn</span>
+                        <span class="skill-badge alt-2">XGBoost</span>
+                        <span class="skill-badge alt-2">Data Preprocessing</span>
+                        <span class="skill-badge alt-2">Predictive Modeling</span>
+                        <span class="skill-badge alt-2">Pattern Classification</span>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">4. Backend &amp; APIs</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge alt-3">FastAPI</span>
+                        <span class="skill-badge alt-3">REST APIs</span>
+                        <span class="skill-badge alt-3">Pydantic Validation</span>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">5. Web Development</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge alt-4">HTML5</span>
+                        <span class="skill-badge alt-4">CSS3</span>
+                        <span class="skill-badge alt-4">React (Project-based)</span>
+                    </div>
+                </div>
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title">6. Tools &amp; Development Environments</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge">Git</span>
+                        <span class="skill-badge">GitHub</span>
+                        <span class="skill-badge">VS Code</span>
+                        <span class="skill-badge">Jupyter Notebook</span>
+                        <span class="skill-badge">SQLite</span>
+                    </div>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>6 Skill Clusters Loaded</span>
+                <span>Python &amp; AI/ML Stack</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 4: PROJECTS -->
+        <div id="win-projects" class="window bevel-out hidden" style="top: 50px; left: 160px; width: 820px; height: 640px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-projects')">
+                <div class="title-bar-left"><span>🚀</span><span>Featured Projects — Ayush Dubey</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-projects')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-projects')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-projects')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="project-grid">
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">1. JARVIS — AI Desktop Assistant</span>
+                        </div>
+                        <p class="project-desc">A desktop assistant project designed to support AI-powered conversations and desktop workflows. Features conversational AI, responsive desktop interface, local memory, voice interaction, and assistant workflow automation.</p>
+                        <div class="project-tech"><strong>Technologies:</strong> Python, PySide6, Google Gemini API, SQLite</div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">2. SentinelEdge — Threat Detection</span>
+                        </div>
+                        <p class="project-desc">A cybersecurity-focused project exploring threat detection and security analytics. Designed to present security-related insights in a clear, useful dashboard interface and support threat analysis.</p>
+                        <div class="project-tech"><strong>Technologies:</strong> Python, Security Analytics, Dashboard UI</div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">3. Fake Review Detector</span>
+                        </div>
+                        <p class="project-desc">A machine-learning project designed to classify potentially fake reviews using data analysis and predictive modelling, identifying suspicious review patterns.</p>
+                        <div class="project-tech"><strong>Technologies:</strong> Python, Pandas, Scikit-learn</div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">4. Maritime Command Center (Smart India Hackathon 2026)</span>
+                        </div>
+                        <p class="project-desc">A maritime analytics platform developed for the Smart India Hackathon 2026 problem statement. Explores freight forecasting, maritime route analytics, and emissions-related insights.</p>
+                        <div class="project-tech"><strong>Technologies:</strong> Python, XGBoost, FastAPI, React, Visualization Tools</div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">5. AI Hub</span>
+                        </div>
+                        <p class="project-desc">A project exploring a unified interface for interacting with modern AI models, making diverse AI tools convenient to access through a single cohesive dashboard.</p>
+                        <div class="project-tech"><strong>Technologies:</strong> Python, Google GenAI</div>
+                    </div>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>5 Featured Projects</span>
+                <span>github.com/Ayush-w-code</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 5: EDUCATION & CERTIFICATIONS -->
+        <div id="win-experience" class="window bevel-out hidden" style="top: 70px; left: 200px; width: 760px; height: 560px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-experience')">
+                <div class="title-bar-left"><span>🎓</span><span>Education &amp; Certifications</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-experience')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-experience')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-experience')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="section-box">
+                    <div class="section-title"><span>🎓</span> Education</div>
+                    <div class="project-card" style="margin-bottom: 8px;">
+                        <div class="project-header">
+                            <span class="project-title">Bachelor of Computer Applications (BCA)</span>
+                        </div>
+                        <p class="project-desc" style="margin-bottom: 2px;"><strong>DBS Global University, Dehradun</strong></p>
+                        <p class="project-desc" style="margin-bottom: 0; color: #555;">2026 – Present</p>
+                    </div>
+                    <div class="project-grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">Class XII</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Completed in 2026</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">Class X</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Completed in 2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title"><span>🏆</span> Certifications &amp; Achievements</div>
+                    <div class="project-grid">
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">💡 AI/ML Certification Course</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Masai Learning, associated with Vishlesan i-Hub, IIT Patna</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">🇮🇳 Smart India Hackathon 2026</div>
+                            <p class="project-desc" style="margin-bottom: 0;">First-round qualification at team level (Maritime Analytics &amp; Freight Forecasting)</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">⚡ Technical Activities &amp; Competitions</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Active participant and contributor across university technical competitions and coding challenges</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Education &amp; Credentials</span>
+                <span>Ayush Dubey</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 6: INTERACTIVE TERMINAL -->
+        <div id="win-terminal" class="window bevel-out hidden" style="top: 110px; left: 260px; width: 680px; height: 430px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-terminal')">
+                <div class="title-bar-left"><span>📟</span><span>AyushShell v1.0 — C:\Users\AyushDubey\ayush.exe</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-terminal')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-terminal')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-terminal')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in terminal-body" onclick="document.getElementById('term-input').focus()">
+                <div id="term-output" class="terminal-output">
+                    <div>AyushOS AyushShell [Version 2026.10]</div>
+                    <div>(c) 2026 Ayush Dubey. All rights reserved.</div>
+                    <div>Type <strong>help</strong> for a list of available commands.</div>
+                    <div>------------------------------------------------------------</div>
+                </div>
+                <div class="terminal-input-row">
+                    <span class="terminal-prompt">ayush@ayush-os:~$</span>
+                    <input id="term-input" class="terminal-input" type="text" autocomplete="off" spellcheck="false" autofocus />
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Interactive Terminal (Sound effects active on keypress)</span>
+                <span>UTF-8</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 7: CONTACT & LINKS -->
+        <div id="win-contact" class="window bevel-out hidden" style="top: 90px; left: 240px; width: 600px; height: 500px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-contact')">
+                <div class="title-bar-left"><span>✉️</span><span>Connect with Ayush Dubey</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-contact')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-contact')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-contact')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="section-box">
+                    <div class="section-title">Direct Contact &amp; Profiles</div>
+                    <p style="margin-bottom: 10px;">
+                        📧 <strong>Email:</strong>
+                        <a href="mailto:ayushdubey2441@gmail.com">ayushdubey2441@gmail.com</a>
+                    </p>
+                    <p style="margin-bottom: 10px;">
+                        🐙 <strong>GitHub:</strong>
+                        <a href="https://github.com/Ayush-w-code" target="_blank" rel="noopener noreferrer">github.com/Ayush-w-code</a>
+                    </p>
+                    <p style="margin-bottom: 10px;">
+                        💼 <strong>LinkedIn:</strong>
+                        <a href="https://www.linkedin.com/in/ayush-dubey-2ba2a3423/" target="_blank" rel="noopener noreferrer">linkedin.com/in/ayush-dubey-2ba2a3423</a>
+                    </p>
+                    <p>
+                        📍 <strong>Location:</strong> DBS Global University, Dehradun, India
+                    </p>
+                </div>
+
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title">Send a Direct Message</div>
+                    <form id="contact-form" onsubmit="submitContact(event)">
+                        <div class="form-group">
+                            <label>Your Name *</label>
+                            <input type="text" id="c-name" class="form-input bevel-in" required placeholder="Enter your name" />
+                        </div>
+                        <div class="form-group">
+                            <label>Your Email *</label>
+                            <input type="email" id="c-email" class="form-input bevel-in" required placeholder="name@example.com" />
+                        </div>
+                        <div class="form-group">
+                            <label>Organization / Subject</label>
+                            <input type="text" id="c-company" class="form-input bevel-in" placeholder="Optional" />
+                        </div>
+                        <div class="form-group">
+                            <label>Message *</label>
+                            <textarea id="c-message" rows="3" class="form-input bevel-in" required placeholder="Write a message to Ayush..."></textarea>
+                        </div>
+                        <button type="submit" class="action-btn bevel-out">📨 Send Message</button>
+                        <span id="contact-status" style="margin-left: 10px; font-weight: bold;"></span>
+                    </form>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Online</span>
+                <span>DBS Global University, Dehradun</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- START MENU -->
+    <div id="start-menu" class="bevel-out hidden">
+        <div class="start-sidebar">
+            <span>AYUSH OS</span>
+        </div>
+        <div class="start-items">
+            <div class="start-item" onclick="openWindow('win-showcase'); closeStartMenu();">🖥️ Portfolio Showcase</div>
+            <div class="start-item" onclick="openWindow('win-about'); closeStartMenu();">👤 About Ayush</div>
+            <div class="start-item" onclick="openWindow('win-skills'); closeStartMenu();">🛠️ Technical Skills</div>
+            <div class="start-item" onclick="openWindow('win-projects'); closeStartMenu();">🚀 Featured Projects</div>
+            <div class="start-item" onclick="openWindow('win-experience'); closeStartMenu();">🎓 Education &amp; Certs</div>
+            <div class="start-item" onclick="openWindow('win-terminal'); closeStartMenu();">📟 AyushShell Terminal</div>
+            <div class="start-item" onclick="openWindow('win-contact'); closeStartMenu();">✉️ Connect / Contact</div>
+            <div class="start-sep"></div>
+            <a class="start-item" href="https://github.com/Ayush-w-code" target="_blank" rel="noopener noreferrer">🐙 GitHub (@Ayush-w-code)</a>
+            <a class="start-item" href="https://www.linkedin.com/in/ayush-dubey-2ba2a3423/" target="_blank" rel="noopener noreferrer">💼 LinkedIn (@ayush-dubey)</a>
+            <a class="start-item" href="mailto:ayushdubey2441@gmail.com">📧 Email Ayush</a>
+        </div>
+    </div>
+
+    <!-- TASKBAR -->
+    <div id="taskbar" class="bevel-out">
+        <div class="taskbar-left">
+            <button id="start-btn" class="bevel-out" onclick="toggleStartMenu(event)">
+                <span>⚡</span>
+                <span>Start</span>
+            </button>
+            <div class="taskbar-divider"></div>
+            <div id="taskbar-tabs"></div>
+        </div>
+        <div class="system-tray">
+            <span>🔊</span>
+            <span id="tray-clock">12:00 PM</span>
+        </div>
+    </div>
+
+    <script>
+        /* ==============================================================
+         * 1. Bubble Events to Parent 3D Scene (Camera & Positional Audio)
+         * ============================================================== */
+        document.addEventListener('mousemove', (e) => {
+            window.parent.postMessage({
+                type: 'mousemove',
+                clientX: e.clientX,
+                clientY: e.clientY
+            }, '*');
+        });
+
+        document.addEventListener('mousedown', () => {
+            window.parent.postMessage({ type: 'mousedown' }, '*');
+        });
+
+        document.addEventListener('mouseup', () => {
+            window.parent.postMessage({ type: 'mouseup' }, '*');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            window.parent.postMessage({
+                type: 'keydown',
+                key: e.key
+            }, '*');
+        });
+
+        document.addEventListener('keyup', (e) => {
+            window.parent.postMessage({
+                type: 'keyup',
+                key: e.key
+            }, '*');
+        });
+
+        /* ==============================================================
+         * 2. Window Manager
+         * ============================================================== */
+        let topZ = 30;
+        const windowMeta = {
+            'win-showcase':   { title: '🖥️ Portfolio Showcase', open: true, minimized: false },
+            'win-about':      { title: '👤 About Ayush',        open: false, minimized: false },
+            'win-skills':     { title: '🛠️ Skills & Toolkit',   open: false, minimized: false },
+            'win-projects':   { title: '🚀 Featured Projects',  open: false, minimized: false },
+            'win-experience': { title: '🎓 Education & Certs',  open: false, minimized: false },
+            'win-terminal':   { title: '📟 AyushShell',         open: false, minimized: false },
+            'win-contact':    { title: '✉️ Connect',            open: false, minimized: false }
+        };
+
+        function focusWindow(id) {
+            topZ++;
+            Object.keys(windowMeta).forEach((winId) => {
+                const el = document.getElementById(winId);
+                if (!el) return;
+                if (winId === id) {
+                    el.style.zIndex = topZ;
+                    el.classList.remove('inactive');
+                } else {
+                    el.classList.add('inactive');
+                }
+            });
+            renderTaskbar();
+        }
+
+        function openWindow(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            windowMeta[id].open = true;
+            windowMeta[id].minimized = false;
+            el.classList.remove('hidden');
+            focusWindow(id);
+            if (id === 'win-terminal') {
+                setTimeout(() => document.getElementById('term-input')?.focus(), 50);
+            }
+        }
+
+        function closeWindow(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            windowMeta[id].open = false;
+            windowMeta[id].minimized = false;
+            el.classList.add('hidden');
+            el.classList.remove('maximized');
+            renderTaskbar();
+        }
+
+        function minimizeWindow(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            windowMeta[id].minimized = true;
+            el.classList.add('hidden');
+            renderTaskbar();
+        }
+
+        function toggleMaximize(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.toggle('maximized');
+            focusWindow(id);
+        }
+
+        function renderTaskbar() {
+            const container = document.getElementById('taskbar-tabs');
+            container.innerHTML = '';
+            let highestId = null;
+            let highestZ = -1;
+
+            Object.keys(windowMeta).forEach((id) => {
+                const el = document.getElementById(id);
+                if (windowMeta[id].open && !windowMeta[id].minimized && el) {
+                    const z = parseInt(el.style.zIndex || '0', 10);
+                    if (z > highestZ) {
+                        highestZ = z;
+                        highestId = id;
+                    }
+                }
+            });
+
+            Object.keys(windowMeta).forEach((id) => {
+                const meta = windowMeta[id];
+                if (!meta.open) return;
+                const btn = document.createElement('button');
+                btn.className = 'task-tab bevel-out' + (id === highestId && !meta.minimized ? ' active' : '');
+                btn.textContent = meta.title;
+                btn.onclick = () => {
+                    if (meta.minimized) {
+                        openWindow(id);
+                    } else if (id === highestId) {
+                        minimizeWindow(id);
+                    } else {
+                        focusWindow(id);
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // Focus window when clicked anywhere
+        document.querySelectorAll('.window').forEach((win) => {
+            win.addEventListener('mousedown', () => {
+                focusWindow(win.id);
+            });
+        });
+
+        // Dragging logic
+        let dragTarget = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        function startDrag(e, id) {
+            if (e.target.tagName === 'BUTTON') return;
+            const el = document.getElementById(id);
+            if (!el || el.classList.contains('maximized')) return;
+            focusWindow(id);
+            dragTarget = el;
+            dragOffsetX = e.clientX - el.offsetLeft;
+            dragOffsetY = e.clientY - el.offsetTop;
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (!dragTarget) return;
+            const maxX = window.innerWidth - 80;
+            const maxY = window.innerHeight - 60;
+            const nx = Math.max(0, Math.min(maxX, e.clientX - dragOffsetX));
+            const ny = Math.max(0, Math.min(maxY, e.clientY - dragOffsetY));
+            dragTarget.style.left = nx + 'px';
+            dragTarget.style.top = ny + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            dragTarget = null;
+        });
+
+        /* ==============================================================
+         * 3. Start Menu & Clock
+         * ============================================================== */
+        function toggleStartMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('start-menu');
+            const btn = document.getElementById('start-btn');
+            menu.classList.toggle('hidden');
+            btn.classList.toggle('active');
+        }
+
+        function closeStartMenu() {
+            document.getElementById('start-menu').classList.add('hidden');
+            document.getElementById('start-btn').classList.remove('active');
+        }
+
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('start-menu');
+            if (!menu.contains(e.target) && e.target.id !== 'start-btn') {
+                closeStartMenu();
+            }
+        });
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('tray-clock').textContent = now.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        /* ==============================================================
+         * 4. Interactive AyushShell Terminal
+         * ============================================================== */
+        const termInput = document.getElementById('term-input');
+        const termOutput = document.getElementById('term-output');
+
+        const commands = {
+            help: () => [
+                'Available AyushShell commands:',
+                '  whoami       - Display Name, Role, Education & Location',
+                '  about        - Read Ayush\'s bio & background',
+                '  objective    - View Career Objective',
+                '  skills       - List Technical Skills & Toolkit',
+                '  projects     - List Featured Projects (JARVIS, SentinelEdge, etc.)',
+                '  education    - View Academic Timeline (DBS Global University)',
+                '  certs        - Show Certifications & SIH 2026 Achievements',
+                '  socials      - Show GitHub, LinkedIn & Email links',
+                '  clear        - Clear terminal output'
+            ].join('\n'),
+            whoami: () => [
+                'Name:     Ayush Dubey',
+                'Role:     BCA Student | Aspiring AI/ML Developer | Python Programmer',
+                'College:  DBS Global University, Dehradun (2026 – Present)',
+                'Location: Dehradun, India'
+            ].join('\n'),
+            about: () => 'I am a BCA student at DBS Global University, Dehradun, with a strong interest in Artificial Intelligence, Machine Learning, Python programming, and software development. I enjoy building practical technology projects, exploring AI-powered solutions, and learning how intelligent systems can solve real-world problems.\n\nI am continuously improving my programming, data analysis, and development skills through hands-on projects, coursework, and technical activities.',
+            bio: () => 'I am a BCA student at DBS Global University, Dehradun, with a strong interest in Artificial Intelligence, Machine Learning, Python programming, and software development. I enjoy building practical technology projects, exploring AI-powered solutions, and learning how intelligent systems can solve real-world problems.\n\nI am continuously improving my programming, data analysis, and development skills through hands-on projects, coursework, and technical activities.',
+            objective: () => 'To develop strong foundations in AI, machine learning, and software engineering while building practical projects that solve real-world problems and contribute to meaningful technology solutions.',
+            skills: () => [
+                '[Programming]     Python, C',
+                '[Data Analysis]   Pandas, NumPy',
+                '[Machine Learning] Scikit-learn, XGBoost, Preprocessing & Predictive Modeling',
+                '[Backend & APIs]  FastAPI, REST APIs',
+                '[Web Development] HTML, CSS, React (project-based experience)',
+                '[Tools & IDEs]    Git, GitHub, VS Code, Jupyter Notebook'
+            ].join('\n'),
+            projects: () => [
+                '1. JARVIS — AI Desktop Assistant (Python, PySide6, Google Gemini API, SQLite)',
+                '   -> Conversational AI, desktop interface, local memory, voice interaction & assistant workflows.',
+                '2. SentinelEdge — Threat Detection (Python, Security Analytics, Dashboard UI)',
+                '   -> Cybersecurity-focused project exploring threat detection & security analytics.',
+                '3. Fake Review Detector (Python, Pandas, Scikit-learn)',
+                '   -> ML project classifying potentially fake reviews using NLP & predictive modelling.',
+                '4. Maritime Command Center — Smart India Hackathon 2026 (Python, XGBoost, FastAPI, React)',
+                '   -> Freight forecasting, maritime route analytics & emissions-related insights.',
+                '5. AI Hub (Python, Google GenAI)',
+                '   -> Unified interface project for interacting seamlessly with modern AI models.'
+            ].join('\n'),
+            education: () => [
+                '• Bachelor of Computer Applications (BCA) - DBS Global University, Dehradun (2026 – Present)',
+                '• Class XII - 2026',
+                '• Class X - 2024'
+            ].join('\n'),
+            experience: () => [
+                '• Bachelor of Computer Applications (BCA) - DBS Global University, Dehradun (2026 – Present)',
+                '• Class XII - 2026',
+                '• Class X - 2024'
+            ].join('\n'),
+            certs: () => [
+                '• AI/ML Certification Course: Masai Learning, associated with Vishlesan i-Hub, IIT Patna',
+                '• Smart India Hackathon 2026: First-round qualification at team level',
+                '• College Technical Activities & Competitions: Active participant and contributor'
+            ].join('\n'),
+            socials: () => [
+                'Email:    ayushdubey2441@gmail.com',
+                'GitHub:   https://github.com/Ayush-w-code',
+                'LinkedIn: https://www.linkedin.com/in/ayush-dubey-2ba2a3423/'
+            ].join('\n'),
+            contact: () => [
+                'Email:    ayushdubey2441@gmail.com',
+                'GitHub:   https://github.com/Ayush-w-code',
+                'LinkedIn: https://www.linkedin.com/in/ayush-dubey-2ba2a3423/'
+            ].join('\n')
+        };
+
+        termInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const raw = termInput.value.trim();
+                const cmd = raw.toLowerCase();
+                const cmdLine = document.createElement('div');
+                const promptSpan = document.createElement('span');
+                promptSpan.style.color = '#00e5ff';
+                promptSpan.textContent = 'ayush@ayush-os:~$ ';
+                cmdLine.appendChild(promptSpan);
+                const cmdText = document.createTextNode(raw);
+                cmdLine.appendChild(cmdText);
+                termOutput.appendChild(cmdLine);
+
+                if (cmd === 'clear') {
+                    termOutput.innerHTML = '';
+                } else if (cmd in commands) {
+                    const res = document.createElement('div');
+                    res.textContent = commands[cmd]();
+                    termOutput.appendChild(res);
+                } else if (cmd !== '') {
+                    const err = document.createElement('div');
+                    err.style.color = '#ff6b6b';
+                    err.textContent = `Command not found: '${raw}'. Type 'help' for available commands.`;
+                    termOutput.appendChild(err);
+                }
+
+                termInput.value = '';
+                termInput.parentElement.parentElement.scrollTop = termInput.parentElement.parentElement.scrollHeight;
+            }
+        });
+
+        /* ==============================================================
+         * 5. Contact Form Submission
+         * ============================================================== */
+        function submitContact(e) {
+            e.preventDefault();
+            const status = document.getElementById('contact-status');
+            const payload = {
+                name: document.getElementById('c-name').value,
+                email: document.getElementById('c-email').value,
+                company: document.getElementById('c-company').value,
+                message: document.getElementById('c-message').value
+            };
+
+            status.style.color = '#000080';
+            status.textContent = 'Sending...';
+
+            fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then((res) => {
+                if (res.ok) {
+                    status.style.color = '#1b5e20';
+                    status.textContent = '✓ Message sent!';
+                    document.getElementById('contact-form').reset();
+                } else {
+                    status.style.color = '#006666';
+                    status.textContent = '✓ Note saved! Connect via LinkedIn or Email: ayushdubey2441@gmail.com';
+                }
+            })
+            .catch(() => {
+                status.style.color = '#006666';
+                status.textContent = '✓ Please connect directly via email: ayushdubey2441@gmail.com';
+            });
+        }
+
+        // Initial render
+        renderTaskbar();
+    </script>
+</body>
+</html>

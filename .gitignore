@@ -1,0 +1,9 @@
+node_modules
+.DS_Store
+*.psd
+.env
+.env.local
+
+public/
+dist/
+.vercel
